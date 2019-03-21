@@ -32,5 +32,5 @@ with open(title + ".csv", mode = 'w') as tallyFile:
 	        tallyFileWritter.writerow([name, umid, points])
 	        hashMap[umid][1] += points
 
-pickle.dump(hashmap, open("hashdoc.txt", "wb"))
+pickle.dump(hashmap, open("hashdoc.csv", "wb"))
 
