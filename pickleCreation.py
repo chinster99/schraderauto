@@ -1,6 +1,7 @@
 import pickle
 hashmap = {
-           83260060 : (Nik, 0)
-           34082872 : (Jack, 0)
+           "83260060" : ["Nik", 0],
+           "34082872" : ["Jack", 0],
+           "18656932" : ["Caleb", 0]
         }
 pickle.dump(hashmap, open("hashdoc.txt", "wb"))
