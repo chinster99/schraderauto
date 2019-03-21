@@ -8,6 +8,8 @@ points = input("Event point worth: ")
 instr = ""
 umid = ""
 
+hashMap = pickle.load(open("hashdoc.txt","rb"))
+
 while instr != "quit":
     instr = input(umid + " ")
     if instr != "quit":
