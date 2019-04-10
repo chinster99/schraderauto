@@ -2,16 +2,6 @@ import csv
 import pickle
 import os
 
-
-def pickleCreation():
-	hashmap = {
-           "83260060" : ["Khosla",0],
-           "34082872" : ["Cummings",0],
-           "18656932" : ["Shelton",0],
-           "31383848" : ["Strehlow",0]
-        }
-        pickle.dump(hashmap, open("hashdoc.txt", "wb"))
-
 def getLastName(instr):
 	sindex = instr.find("^")
 	eindex = instr.find("/")
