@@ -1,36 +1,84 @@
 import csv
 import pickle
+import os
 
+
+def pickleCreation():
+	hashmap = {
+           "83260060" : ["Khosla",0],
+           "34082872" : ["Cummings",0],
+           "18656932" : ["Shelton",0],
+           "31383848" : ["Strehlow",0]
+        }
+        pickle.dump(hashmap, open("hashdoc.txt", "wb"))
+
+def getLastName(instr):
+	sindex = instr.find("^")
+	eindex = instr.find("/")
+	return instr[sindex + 1: eindex]
+
+def updateHashmap(hashMap, name, umid):
+	hashMap[umid] = [name,0]
+
+def printHashMap(hashMap):
+	for x in hashMap:
+		print("UMID: " , x , " " , hashMap[x][0] , " " , hashMap[x][1])
+
+
+#download the hashmap file
+
+#Obtain Input information
 print("Welcome to the Schrader form automator!")
+
 perName = input("Please enter your name: ")
 committee = input("Committee: ")
 date = input("Event date: ")
 title = input("Event title: ")
 p = input("Event point worth: ")
 
-points = int(p);
-
+points = int(p)
 instr = ""
 umid = ""
 name = ""
 
+#Open prebuilt hashMap
 hashMap = pickle.load(open("hashdoc.txt","rb"))
 
+#open csv writer
 with open(title + ".csv", mode = 'w') as tallyFile:
-	tallyFileWritter = csv.writer(tallyFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-	tallyFileWritter.writerow(["Name: ", perName])
-	tallyFileWritter.writerow(["Committee: ", committee])
-	tallyFileWritter.writerow(["Date:", date])
-	tallyFileWritter.writerow(["Event name: ", title])
-	tallyFileWritter.writerow(["Points for event: ", str(points)])
-	tallyFileWritter.writerow(["Name", "UM ID", "Points"])
+	tallyFileWriter = csv.writer(tallyFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+	
+	#write basic into to csv
+	tallyFileWriter.writerow(["Name: ", perName])
+	tallyFileWriter.writerow(["Committee: ", committee])
+	tallyFileWriter.writerow(["Date:", date])
+	tallyFileWriter.writerow(["Event name: ", title])
+	tallyFileWriter.writerow(["Points for event: ", str(points)])
+	tallyFileWriter.writerow(["Last Name", "UM ID", "Points"])
+
+	#accept umid input
 	while instr != "quit":
 	    instr = input(umid + " ")
+
 	    if instr != "quit":
 	        umid = instr[8:16]
-	        name = hashMap[umid][0]
-	        tallyFileWritter.writerow([name, umid, points])
-	        hashMap[umid][1] += points
 
-pickle.dump(hashmap, open("hashdoc.csv", "wb"))
+	        if umid not in hashMap:
+	        	name = getLastName(instr)
+	        	updateHashmap(hashMap, name, umid)
+
+	        name = hashMap[umid][0] 
+
+	        tallyFileWriter.writerow([name, umid, points])
+	        #update running tally in hashMap
+	        hashMap[umid][1] += int(points)
+#update 
+pickle.dump(hashMap, open("hashdoc.txt", "wb"))
+printHashMap(hashMap)
+
+#delete hashmap file from drive, and then upload local hashmap file
+
+#delte hashmap after run inorder to prevent different local copies
+#if os.path.exists("hashdoc.txt"):
+#	os.remove("hashdoc.txt")
 
