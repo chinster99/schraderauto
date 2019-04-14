@@ -1,7 +1,7 @@
 Auto Shrader Form Instructions:
 
     #Setup(for first time use):
-    -Make sure you have python installed
+    -Make sure you have Python3 installed
     - Install google drive api, type the following into terminal: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
     
     #How to use:
