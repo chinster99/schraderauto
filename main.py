@@ -178,9 +178,3 @@ with open("FinalPointsTally_"+termName+".csv", mode = 'w') as finalFile:
 
 driveUpload(term=termName, title=title, date=date)
 
-#delete hashMap file from drive, and then upload local hashMap file
-
-#delte hashMap after run inorder to prevent different local copies
-#if os.path.exists("hashdoc.txt"):
-#	os.remove("hashdoc.txt")
-
