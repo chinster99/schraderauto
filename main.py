@@ -99,7 +99,7 @@ def driveUpload(term):
 print("Welcome to the Schrader form automator!")
 termName = input("Please enter the term (example w2019, f2018, etc.): ")
 
-#download the hashmap file
+#download the hashMap file
 driveDownload(term=termName)
 
 perName = input("Please enter your name: ")
@@ -149,11 +149,18 @@ with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 	        hashMap[umid][1] += int(points)
 #update 
 pickle.dump(hashMap, open("./hashdoc_"+termName+".pickle", "wb"))
+
+with open("Final_Tally.txt", mode = 'wb') as finalFile:
+	finalFileWriter = csv.writer(finalFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+	tallyFileWriter.writerow(["UM ID", "Last Name", "Points"])
+	for michID, v in hashMap.items():
+		tallyFileWriter.writerow([michID, v[0], v[1]])
+
 driveUpload(term=termName)
 
-#delete hashmap file from drive, and then upload local hashmap file
+#delete hashMap file from drive, and then upload local hashMap file
 
-#delte hashmap after run inorder to prevent different local copies
+#delte hashMap after run inorder to prevent different local copies
 #if os.path.exists("hashdoc.txt"):
 #	os.remove("hashdoc.txt")
 
