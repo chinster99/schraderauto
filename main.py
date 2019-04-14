@@ -80,13 +80,19 @@ def driveUpload(term):
 			pickle.dump(creds, token)
 
 	service = build('drive', 'v3', credentials=creds)
-	fileList = glob.glob('./Schrader_'+term+'*.csv')
+	fileList = glob.glob('*.csv')
 	for i in fileList:
 		file_metadata = {'name': i}
 		media = MediaFileUpload('files/' + i, mimetype='')
 		file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 		print('File ID: %s' % file.get('id'))
 		os.remove(i)
+		
+	file_metadata = {'name': "./hashdoc_"+termName+".pickle"}
+	media = MediaFileUpload('files/' + "./hashdoc_"+termName+".pickle", mimetype='')
+	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+	print('File ID: %s' % file.get('id'))
+	os.remove("./hashdoc_"+termName+".pickle")
 
 #Obtain Input information
 print("Welcome to the Schrader form automator!")
