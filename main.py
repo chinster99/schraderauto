@@ -91,7 +91,8 @@ def driveUpload(term, title, date):
 		except errors.HttpError:
 			print('Cannot delete old hashmap from drive')
 	
-	results = service.files().list(fields="nextPageToken, files(id, name)", q="name='FinalPointsTally_"+term+".csv'").execute()
+	#results = service.files().list(fields="nextPageToken, files(id, name)", q="name='FinalPointsTally_"+term+".csv'").execute()
+	results = service.files().list(fields="nextPageToken, files(id, name)", q = "name contains 'FinalPointsTally_'").execute()
 	items = results.get('files', [])
 	for i in items:
 		try:
