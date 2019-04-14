@@ -100,17 +100,17 @@ def driveUpload(term, title, date):
 			print('Cannot delete old hashmap from drive')
 
 	file_metadata = {'name': 'FinalPointsTally_'+term+'.csv'}
-	media = MediaFileUpload('./FinalPointsTally_'+term+'.csv', mimetype='media/csv')
+	media = MediaFileUpload('./FinalPointsTally_'+term+'.csv', mimetype='text/csv')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove('./FinalPointsTally_'+term+'.csv')
 
 	file_metadata = {'name': "hashdoc_"+termName+".pickle"}
-	media = MediaFileUpload("./hashdoc_"+termName+".pickle", mimetype='media/pickle')
+	media = MediaFileUpload("./hashdoc_"+termName+".pickle", mimetype='text/pickle')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove("./hashdoc_"+termName+".pickle")
 
 	file_metadata = {'name': title + "_"+ date + ".csv"}
-	media = MediaFileUpload("./"+ title + "_"+ date + ".csv", mimetype='media/csv')
+	media = MediaFileUpload("./"+ title + "_"+ date + ".csv", mimetype='text/csv')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove("./"+ title + "_"+ date + ".csv")
 	
