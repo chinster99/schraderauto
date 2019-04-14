@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient.http import MediaFileUpload
+from apiclient.http import MediaIoBaseDownload
 import csv
 import pickle
 import os
@@ -61,7 +62,7 @@ def driveDownload(term):
 				status, done = downloader.next_chunk()
 				print("Downloading hashmap %d%%." % int(status.progress() * 100))
 
-def driveUpload(term):
+def driveUpload(term, title, date):
 	creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -81,19 +82,24 @@ def driveUpload(term):
 			pickle.dump(creds, token)
 
 	service = build('drive', 'v3', credentials=creds)
-	fileList = glob.glob('*.csv')
-	for i in fileList:
-		file_metadata = {'name': i}
-		media = MediaFileUpload('./' + i, mimetype='media/csv')
-		file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-		print('File ID: %s' % file.get('id'))
-		os.remove(i)
+	file_metadata = {'name': 'FinalPointsTally_'+term+'.csv'}
+	media = MediaFileUpload('./FinalPointsTally_'+term+'.csv', mimetype='media/csv')
+	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+	print('File ID: %s' % file.get('id'))
+	os.remove('./FinalPointsTally_'+term+'.csv')
 
-	file_metadata = {'name': "./hashdoc_"+termName+".pickle"}
-	media = MediaFileUpload('./' + "./hashdoc_"+termName+".pickle", mimetype='media/pickle')
+	file_metadata = {'name': "hashdoc_"+termName+".pickle"}
+	media = MediaFileUpload("./hashdoc_"+termName+".pickle", mimetype='media/pickle')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	print('File ID: %s' % file.get('id'))
 	os.remove("./hashdoc_"+termName+".pickle")
+
+	file_metadata = {'name': title + "_"+ date + ".csv"}
+	media = MediaFileUpload("./"+ title + "_"+ date + ".csv", mimetype='media/csv')
+	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+	print('File ID: %s' % file.get('id'))
+	os.remove("./"+ title + "_"+ date + ".csv")
+	
 
 #Obtain Input information
 print("Welcome to the Schrader form automator!")
@@ -115,7 +121,7 @@ umid = ""
 name = ""
 
 #Open prebuilt hashMap
-hashMap = None
+hashMap = {}
 if os.path.exists("./hashdoc_"+termName+".pickle"):
 	hashMap = pickle.load(open("./hashdoc_"+termName+"pickle","rb"))
 
@@ -150,13 +156,13 @@ with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 #update 
 pickle.dump(hashMap, open("./hashdoc_"+termName+".pickle", "wb"))
 
-with open("Final_Tally.txt", mode = 'wb') as finalFile:
+with open("FinalPointsTally_"+termName+".csv", mode = 'w') as finalFile:
 	finalFileWriter = csv.writer(finalFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-	tallyFileWriter.writerow(["UM ID", "Last Name", "Points"])
+	finalFileWriter.writerow(["Last Name", "UM ID", "Points"])
 	for michID, v in hashMap.items():
-		tallyFileWriter.writerow([michID, v[0], v[1]])
+		finalFileWriter.writerow([michID, v[0], v[1]])
 
-driveUpload(term=termName)
+driveUpload(term=termName, title=title, date=date)
 
 #delete hashMap file from drive, and then upload local hashMap file
 

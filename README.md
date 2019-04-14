@@ -1,0 +1,1 @@
+to run, type `python3 main.py` in your terminal
