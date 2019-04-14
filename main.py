@@ -2,6 +2,7 @@ from __future__ import print_function
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from apiclient.http import MediaFileUpload
 import csv
 import pickle
 import os
@@ -10,7 +11,7 @@ import sys
 import io
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive']
 
 def getLastName(instr):
 	sindex = instr.find("^")
@@ -83,13 +84,13 @@ def driveUpload(term):
 	fileList = glob.glob('*.csv')
 	for i in fileList:
 		file_metadata = {'name': i}
-		media = MediaFileUpload('files/' + i, mimetype='')
+		media = MediaFileUpload('./' + i, mimetype='media/csv')
 		file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 		print('File ID: %s' % file.get('id'))
 		os.remove(i)
-		
+
 	file_metadata = {'name': "./hashdoc_"+termName+".pickle"}
-	media = MediaFileUpload('files/' + "./hashdoc_"+termName+".pickle", mimetype='')
+	media = MediaFileUpload('./' + "./hashdoc_"+termName+".pickle", mimetype='media/pickle')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	print('File ID: %s' % file.get('id'))
 	os.remove("./hashdoc_"+termName+".pickle")
@@ -149,7 +150,6 @@ with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 #update 
 pickle.dump(hashMap, open("./hashdoc_"+termName+".pickle", "wb"))
 driveUpload(term=termName)
-printHashMap(hashMap)
 
 #delete hashmap file from drive, and then upload local hashmap file
 
