@@ -6,6 +6,8 @@ import csv
 import pickle
 import os
 import glob
+import sys
+import io
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
@@ -22,7 +24,7 @@ def printHashMap(hashMap):
 	for x in hashMap:
 		print("UMID: " , x , " " , hashMap[x][0] , " " , hashMap[x][1])
 
-def driveDownload():
+def driveDownload(term):
 	creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -44,17 +46,21 @@ def driveDownload():
 	service = build('drive', 'v3', credentials=creds)
 
 	# Call the Drive v3 API
-	results = service.files().list(fields="nextPageToken, files(id, name)").execute()
+	results = service.files().list(fields="nextPageToken, files(id, name)", q="name='hashdoc_" + term + ".pickle'").execute()
 	items = results.get('files', [])
 
-	if not items:
-		print('No files found.')
-	else:
+	if items:
 		print('Files:')
 		for item in items:
-			print(u'{0} ({1})'.format(item['name'], item['id']))
+			request = service.files().get_media(fileId=item['id'])
+			fh = io.BytesIO()
+			downloader = MediaIoBaseDownload(fh, request)
+			done = False
+			while done is False:
+				status, done = downloader.next_chunk()
+				print("Downloading hashmap %d%%." % int(status.progress() * 100))
 
-def driveUpload():
+def driveUpload(term):
 	creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -74,21 +80,27 @@ def driveUpload():
 			pickle.dump(creds, token)
 
 	service = build('drive', 'v3', credentials=creds)
-	fileList = glob.glob('./*.csv')
+	fileList = glob.glob('./Schrader_'+term+'*.csv')
 	for i in fileList:
 		file_metadata = {'name': i}
-		media = MediaFileUpload()
-
-#download the hashmap file
+		media = MediaFileUpload('files/' + i, mimetype='')
+		file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+		print('File ID: %s' % file.get('id'))
+		os.remove(i)
 
 #Obtain Input information
 print("Welcome to the Schrader form automator!")
+termName = input("Please enter the term (example w2019, f2018, etc.): ")
+
+#download the hashmap file
+driveDownload(term=termName)
 
 perName = input("Please enter your name: ")
 committee = input("Committee: ")
-date = input("Event date: ")
+date = input("Event date (example 1-1-2019): ")
 title = input("Event title: ")
 p = input("Event point worth: ")
+print("Swipe MCards or enter 'quit' to exit!")
 
 points = int(p)
 instr = ""
@@ -97,11 +109,11 @@ name = ""
 
 #Open prebuilt hashMap
 hashMap = None
-if os.path.exists("./hashdoc.pickle"):
-	hashMap = pickle.load(open("hashdoc.pickle","rb"))
+if os.path.exists("./hashdoc_"+termName+".pickle"):
+	hashMap = pickle.load(open("./hashdoc_"+termName+"pickle","rb"))
 
 #open csv writer
-with open(title + "_"+ date + ".csv", mode = 'w') as tallyFile:
+with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 	tallyFileWriter = csv.writer(tallyFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 	
 	#write basic into to csv
@@ -129,7 +141,8 @@ with open(title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 	        #update running tally in hashMap
 	        hashMap[umid][1] += int(points)
 #update 
-pickle.dump(hashMap, open("hashdoc.pickle", "wb"))
+pickle.dump(hashMap, open("./hashdoc_"+termName+".pickle", "wb"))
+driveUpload(term=termName)
 printHashMap(hashMap)
 
 #delete hashmap file from drive, and then upload local hashmap file
