@@ -4,6 +4,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient.http import MediaFileUpload
 from apiclient.http import MediaIoBaseDownload
+from apiclient import errors
 import csv
 import pickle
 import os
@@ -52,10 +53,9 @@ def driveDownload(term):
 	items = results.get('files', [])
 
 	if items:
-		print('Files:')
 		for item in items:
 			request = service.files().get_media(fileId=item['id'])
-			fh = io.BytesIO()
+			fh = io.FileIO('hashdoc_' + term + '.pickle', 'wb')
 			downloader = MediaIoBaseDownload(fh, request)
 			done = False
 			while done is False:
@@ -82,22 +82,36 @@ def driveUpload(term, title, date):
 			pickle.dump(creds, token)
 
 	service = build('drive', 'v3', credentials=creds)
+
+	results = service.files().list(fields="nextPageToken, files(id, name)", q="name='hashdoc_" + term + ".pickle'").execute()
+	items = results.get('files', [])
+	for i in items:
+		try:
+			service.files().delete(fileId=i['id']).execute()
+		except errors.HttpError:
+			print('Cannot delete old hashmap from drive')
+	
+	results = service.files().list(fields="nextPageToken, files(id, name)", q="name='FinalPointsTally_"+term+".csv'").execute()
+	items = results.get('files', [])
+	for i in items:
+		try:
+			service.files().delete(fileId=i['id']).execute()
+		except errors.HttpError:
+			print('Cannot delete old hashmap from drive')
+
 	file_metadata = {'name': 'FinalPointsTally_'+term+'.csv'}
 	media = MediaFileUpload('./FinalPointsTally_'+term+'.csv', mimetype='media/csv')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-	print('File ID: %s' % file.get('id'))
 	os.remove('./FinalPointsTally_'+term+'.csv')
 
 	file_metadata = {'name': "hashdoc_"+termName+".pickle"}
 	media = MediaFileUpload("./hashdoc_"+termName+".pickle", mimetype='media/pickle')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-	print('File ID: %s' % file.get('id'))
 	os.remove("./hashdoc_"+termName+".pickle")
 
 	file_metadata = {'name': title + "_"+ date + ".csv"}
 	media = MediaFileUpload("./"+ title + "_"+ date + ".csv", mimetype='media/csv')
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-	print('File ID: %s' % file.get('id'))
 	os.remove("./"+ title + "_"+ date + ".csv")
 	
 
@@ -123,7 +137,7 @@ name = ""
 #Open prebuilt hashMap
 hashMap = {}
 if os.path.exists("./hashdoc_"+termName+".pickle"):
-	hashMap = pickle.load(open("./hashdoc_"+termName+"pickle","rb"))
+	hashMap = pickle.load(open("./hashdoc_"+termName+".pickle","rb"))
 
 #open csv writer
 with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
