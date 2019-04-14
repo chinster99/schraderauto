@@ -151,6 +151,7 @@ with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 	tallyFileWriter.writerow(["Points for event: ", str(points)])
 	tallyFileWriter.writerow(["Last Name", "UM ID", "Points"])
 
+	tempSwipes = {};
 	#accept umid input
 	while instr != "quit":
 	    instr = input(umid + " ")
@@ -163,10 +164,13 @@ with open("./"+ title + "_"+ date + ".csv", mode = 'w') as tallyFile:
 	        	updateHashmap(hashMap, name, umid)
 
 	        name = hashMap[umid][0] 
-
-	        tallyFileWriter.writerow([name, umid, points])
-	        #update running tally in hashMap
-	        hashMap[umid][1] += int(points)
+	        if umid not in tempSwipes:
+	        	tallyFileWriter.writerow([name, umid, points])
+	        	#update running tally in hashMap
+	        	hashMap[umid][1] += int(points)
+	        	tempSwipes[umid] = name
+	        else:
+	        	print("\n " + name + " Has already swiped \n")
 #update 
 pickle.dump(hashMap, open("./hashdoc_"+termName+".pickle", "wb"))
 
@@ -177,4 +181,5 @@ with open("FinalPointsTally_"+termName+".csv", mode = 'w') as finalFile:
 		finalFileWriter.writerow([michID, v[0], v[1]])
 
 driveUpload(term=termName, title=title, date=date)
+print("Sucessfully Completed")
 
