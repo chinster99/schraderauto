@@ -99,8 +99,8 @@ def driveUpload(term, title, date):
 		except errors.HttpError:
 			print('Cannot delete old hashmap from drive')
 
-	file_metadata = {'name': 'FinalPointsTally_'+term+'.csv'}
-	media = MediaFileUpload('./FinalPointsTally_'+term+'.csv', mimetype='text/csv')
+	file_metadata = {'name': 'FinalPointsTally_'+term+'.csv', 'mimeType': 'application/vnd.google-apps.spreadsheet'}
+	media = MediaFileUpload('./FinalPointsTally_'+term+'.csv', mimetype='text/csv', resumable=True)
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove('./FinalPointsTally_'+term+'.csv')
 
@@ -109,8 +109,8 @@ def driveUpload(term, title, date):
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove("./hashdoc_"+termName+".pickle")
 
-	file_metadata = {'name': title + "_"+ date + ".csv"}
-	media = MediaFileUpload("./"+ title + "_"+ date + ".csv", mimetype='text/csv')
+	file_metadata = {'name': title + "_"+ date + ".csv", 'mimeType': 'application/vnd.google-apps.spreadsheet'}
+	media = MediaFileUpload("./"+ title + "_"+ date + ".csv", mimetype='text/csv', resumable=True)
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove("./"+ title + "_"+ date + ".csv")
 	
