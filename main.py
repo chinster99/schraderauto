@@ -115,7 +115,7 @@ def driveUpload(term, title, date):
 	file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
 	os.remove("./"+ title + "_"+ date + ".csv")
 	
-
+############# MAIN #######################
 #Obtain Input information
 print("Welcome to the Schrader form automator!")
 termName = input("Please enter the term (example w2019, f2018, etc.): ")
